@@ -1,3 +1,4 @@
 from .app import App
+from .window import Window
 
-__all__ = ["App"]
+__all__ = ["App", "Window"]
