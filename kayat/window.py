@@ -1,3 +1,4 @@
+from .core.bridge import Bridge
 from .webview.pywebview import PyWebView
 
 
@@ -7,10 +8,13 @@ class Window:
         self.width = width
         self.height = height
 
+        self.bridge = Bridge()
+
         self.webview = PyWebView(
             title,
             width,
             height,
+            self.bridge,
         )
 
     def load_html(self, html):
