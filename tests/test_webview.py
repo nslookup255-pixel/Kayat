@@ -35,9 +35,33 @@ sys.modules["webview"].create_window = fake_webview.create_window
 sys.modules["webview"].start = fake_webview.start
 
 from kayat.webview.pywebview import PyWebView
+from kayat.core.bridge import Bridge
+from kayat.window import PythonAPI
 
 
 class PyWebViewTest(unittest.TestCase):
+	def test_window_connects_both_communication_directions(self):
+		from kayat.window import Window
+
+		window = Window("Test")
+		window.bridge.register("hello", lambda name: f"Hello, {name}!")
+
+		self.assertIs(window.webview.js_api, window.api)
+		self.assertEqual(window.api.hello("World"), "Hello, World!")
+		self.assertIs(window.js._webview, window.webview)
+
+	def test_registered_bridge_function_is_exposed_directly_on_js_api(self):
+		bridge = Bridge()
+
+		def hello(name):
+			return f"Hello, {name}!"
+
+		bridge.register("hello", hello)
+		api = PythonAPI(bridge)
+
+		self.assertEqual(api.hello("World"), "Hello, World!")
+		self.assertIn("hello", dir(api))
+
 	def test_show_passes_python_api_to_pywebview(self):
 		api = object()
 		view = PyWebView("Test", 800, 600, api)

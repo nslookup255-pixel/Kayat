@@ -28,11 +28,14 @@ class JSApiTest(unittest.TestCase):
 		webview = RecordingWebView(result=None)
 		js = JS(webview)
 
-		js.call("window.setValue", 'quote"', {"enabled": True})
+		js.call("window.setValue", 'quote"', 3, True, None, [1, "two"], {"enabled": False})
 
 		self.assertEqual(
 			webview.scripts,
-			['globalThis["window"]["setValue"]("quote\\\"", {"enabled": true})'],
+			[
+				'globalThis["window"]["setValue"]('
+				'"quote\\\"", 3, true, null, [1, "two"], {"enabled": false})'
+			],
 		)
 
 

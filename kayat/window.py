@@ -7,6 +7,18 @@ class PythonAPI:
     def __init__(self, bridge):
         self._bridge = bridge
 
+    def __getattr__(self, name):
+        if name.startswith("_"):
+            raise AttributeError(name)
+
+        try:
+            return self._bridge._functions[name]
+        except KeyError as error:
+            raise AttributeError(name) from error
+
+    def __dir__(self):
+        return sorted(set(super().__dir__()) | set(self._bridge._functions))
+
     def call(self, name, *args, **kwargs):
         return self._bridge.call(name, *args, **kwargs)
 
