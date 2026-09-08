@@ -4,25 +4,36 @@ from kayat.core.bridge import Bridge
 from kayat.core.js import JS
 
 
-class RecordingBridge:
+class RecordingWebView:
 	def __init__(self, result):
 		self.result = result
-		self.calls = []
+		self.scripts = []
 
-	def call(self, name, *args):
-		self.calls.append((name, args))
+	def evaluate_js(self, script):
+		self.scripts.append(script)
 		return self.result
 
 
 class JSApiTest(unittest.TestCase):
 	def test_call_forwards_name_and_arguments_and_returns_result(self):
-		bridge = RecordingBridge(result={"ok": True})
-		js = JS(bridge)
+		webview = RecordingWebView(result={"ok": True})
+		js = JS(webview)
 
 		result = js.call("window.alert", "Hello", 42)
 
 		self.assertEqual(result, {"ok": True})
-		self.assertEqual(bridge.calls, [("js_call", ("window.alert", "Hello", 42))])
+		self.assertEqual(webview.scripts, ['globalThis["window"]["alert"]("Hello", 42)'])
+
+	def test_call_serializes_javascript_values(self):
+		webview = RecordingWebView(result=None)
+		js = JS(webview)
+
+		js.call("window.setValue", 'quote"', {"enabled": True})
+
+		self.assertEqual(
+			webview.scripts,
+			['globalThis["window"]["setValue"]("quote\\\"", {"enabled": true})'],
+		)
 
 
 class BridgeTest(unittest.TestCase):

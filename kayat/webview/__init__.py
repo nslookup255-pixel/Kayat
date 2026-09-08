@@ -1,4 +1,4 @@
-import kayat.webview as webview
+from .pywebview import PyWebView
 
 
 __all__ = ["PyWebView"]
