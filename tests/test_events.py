@@ -63,6 +63,41 @@ def test_emit_passes_arg():
 
     assert called == [(1, 2)]
 
+def test_emit_calls_remaining_listeners_when_one_removes_itself():
+    events = E()
+    called = []
+
+    def first():
+        called.append("first")
+        events.off("test_event", first)
+
+    def second():
+        called.append("second")
+
+    events.on("test_event", first)
+    events.on("test_event", second)
+    events.emit("test_event")
+
+    assert called == ["first", "second"]
+
+def test_once_listener_is_removed_when_it_raises():
+    events = E()
+    calls = []
+
+    def listener():
+        calls.append("called")
+        raise RuntimeError("failure")
+
+    events.once("test_event", listener)
+
+    for _ in range(2):
+        try:
+            events.emit("test_event")
+        except RuntimeError:
+            pass
+
+    assert calls == ["called"]
+
 if __name__ == "__main__":
     test_on_and_emit()
     test_off()

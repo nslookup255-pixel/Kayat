@@ -18,12 +18,12 @@ class Events:
 
     def once(self, event_name, listener):
         def wrapper(*args, **kwargs):
-            listener(*args, **kwargs)
             self.off(event_name, wrapper)
+            listener(*args, **kwargs)
 
         self.on(event_name, wrapper)
 
     def emit(self, event_name, *args, **kwargs):
         if event_name in self._listeners:
-            for listener in self._listeners[event_name]:
+            for listener in list(self._listeners[event_name]):
                 listener(*args, **kwargs)
