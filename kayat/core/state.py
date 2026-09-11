@@ -1,10 +1,32 @@
 from kayat.core.events import Events
 
+
+_UNSET = object()
+
 class State:
 
-    def __init__(self):
+    def __init__(self, initial_value=_UNSET):
+        self._initial_value = initial_value
+        self._name = None
         self._data = {}
         self._events = Events()
+
+    def __set_name__(self, owner, name):
+        self._name = name
+
+    def __get__(self, instance, owner=None):
+        if instance is None:
+            return self
+        if self._name is None:
+            raise AttributeError("State must be assigned to a class attribute")
+        if self._name not in instance._state._data:
+            instance._state.set(self._name, self._initial_value)
+        return instance._state.get(self._name)
+
+    def __set__(self, instance, value):
+        if self._name is None:
+            raise AttributeError("State must be assigned to a class attribute")
+        instance._state.set(self._name, value)
 
     def get(self, key):
         if key not in self._data:

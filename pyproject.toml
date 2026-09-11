@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "kayat"
-version = "0.0.5"
+version = "0.1.0"
 description = "A Python-first desktop GUI framework powered by HTML and CSS."
 readme = "README.md"
 requires-python = ">=3.10"
