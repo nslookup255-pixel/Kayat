@@ -1,4 +1,4 @@
-from .ui.component import Component
+from .core.component import Component
 
 class App:
     def __init__(self, title="Kayat App"):

@@ -1,6 +1,6 @@
 from kayat.app import App
 from kayat.core.state import State
-from kayat.ui.component import Component
+from kayat.core.component import Component
 from kayat.ui import Column, Text, Button
 
 

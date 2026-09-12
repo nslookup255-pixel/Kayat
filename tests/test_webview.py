@@ -35,7 +35,7 @@ sys.modules["webview"].create_window = fake_webview.create_window
 sys.modules["webview"].start = fake_webview.start
 
 from kayat.webview.pywebview import PyWebView
-from kayat.core.bridge import Bridge
+from kayat.bridge import Bridge
 from kayat.window import PythonAPI
 
 

@@ -1,5 +1,4 @@
-from .core.bridge import Bridge
-from .core.js import JS
+from .bridge import Bridge, JS
 from .webview.pywebview import PyWebView
 
 
