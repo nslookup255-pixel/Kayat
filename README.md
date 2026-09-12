@@ -47,5 +47,5 @@ Build desktop GUI applications with Python and HTML.
 - [x] Component system
 - [x] Element / UI
 - [ ] Connect Windows and Webview(UI)
+  - [x] Real HTML rendering
 - [ ] Connect Python and JS
-- [ ] Real HTML rendering
