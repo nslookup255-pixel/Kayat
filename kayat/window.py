@@ -42,6 +42,10 @@ class Window:
     def load_html(self, html):
         self.webview.load_html(html)
 
+    def load(self, html):
+        """Load rendered HTML into the window's WebView."""
+        self.load_html(html)
+
     def show(self):
         self.webview.show()
 

@@ -1,10 +1,16 @@
 from .core.component import Component
+from .rendering import HTMLRenderer
+
 
 class App:
-    def __init__(self, title="Kayat App"):
+    def __init__(self, title="Kayat App", width=800, height=600, window=None, renderer=None):
         self.title = title
+        self.width = width
+        self.height = height
         self.root = None
         self._mounted = False
+        self.window = window
+        self.renderer = renderer or HTMLRenderer()
 
     @property
     def mounted(self):
@@ -35,5 +41,13 @@ class App:
 
         if not self._mounted:
             self.root.mount()
+
+        if self.window is None:
+            from .window import Window
+
+            self.window = Window(self.title, self.width, self.height)
+
+        self.window.load_html(self.renderer.render(self.root))
+        self.window.show()
 
         return self.root

@@ -10,6 +10,8 @@ class PyWebView(WebView):
         self.height = height
         self.js_api = js_api
         self.html = ""
+        self.window = None
+        self._started = False
 
     def load_html(self, html):
         self.html = html
@@ -18,6 +20,9 @@ class PyWebView(WebView):
         return self.window.evaluate_js(script)
 
     def show(self):
+        if self._started:
+            return
+
         self.window = webview.create_window(
             self.title,
             html=self.html,
@@ -27,6 +32,7 @@ class PyWebView(WebView):
         )
 
         webview.start()
+        self._started = True
 
     def close(self):
         self.window.destroy()

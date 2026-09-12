@@ -50,6 +50,17 @@ class PyWebViewTest(unittest.TestCase):
 		self.assertEqual(window.api.hello("World"), "Hello, World!")
 		self.assertIs(window.js._webview, window.webview)
 
+	def test_window_load_forwards_html_to_webview(self):
+		from kayat.window import Window
+
+		window = Window("Test")
+		window.webview = types.SimpleNamespace(html=None)
+		window.webview.load_html = lambda html: setattr(window.webview, "html", html)
+
+		window.load('<span class="kayat-text">Hello</span>')
+
+		self.assertEqual(window.webview.html, '<span class="kayat-text">Hello</span>')
+
 	def test_registered_bridge_function_is_exposed_directly_on_js_api(self):
 		bridge = Bridge()
 
@@ -75,6 +86,15 @@ class PyWebViewTest(unittest.TestCase):
 		self.assertEqual(kwargs["width"], 800)
 		self.assertEqual(kwargs["height"], 600)
 		self.assertIs(kwargs["js_api"], api)
+
+	def test_show_does_not_start_a_second_gui_loop(self):
+		view = PyWebView("Test", 800, 600)
+		view.load_html("<h1>Test</h1>")
+
+		view.show()
+		view.show()
+
+		self.assertEqual(fake_webview.created_with[1]["html"], "<h1>Test</h1>")
 
 	def test_evaluate_js_and_close_delegate_to_window(self):
 		view = PyWebView("Test", 800, 600)
