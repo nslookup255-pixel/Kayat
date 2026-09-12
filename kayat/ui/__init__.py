@@ -1,11 +1,21 @@
-"""Compatibility imports for the UI primitives.
+"""Small, composable UI primitives for Kayat."""
 
-The primitives now live in :mod:`kayat.core`; they remain available here so
-applications using the original public ``kayat.ui`` API continue to work.
-"""
-
-from ..core.component import Button, Column, Component, Text
+from ..core.component import Component
 from ..core.element import Element
 from ..core.state import State
+from .button import Button
+from .column import Column
+from .container import Container
+from .row import Row
+from .text import Text
 
-__all__ = ["Button", "Column", "Component", "Element", "State", "Text"]
+__all__ = [
+	"Button",
+	"Column",
+	"Component",
+	"Container",
+	"Element",
+	"Row",
+	"State",
+	"Text",
+]

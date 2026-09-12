@@ -75,22 +75,3 @@ class Component:
 		elif isinstance(node, Element):
 			for child in node.children:
 				self._unmount_children(child)
-
-
-class Column(Element):
-	pass
-
-
-class Text(Element):
-	def __init__(self, value, **props):
-		super().__init__(**props)
-		self.value = value
-
-
-class Button(Element):
-	def __init__(self, label, on_click=None, **props):
-		super().__init__(on_click=on_click, **props)
-		self.label = label
-
-	def click(self, *args, **kwargs):
-		return self.trigger("click", *args, **kwargs)
