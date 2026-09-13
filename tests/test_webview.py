@@ -59,7 +59,52 @@ class PyWebViewTest(unittest.TestCase):
 
 		window.load('<span class="kayat-text">Hello</span>')
 
-		self.assertEqual(window.webview.html, '<span class="kayat-text">Hello</span>')
+		self.assertIn('<span class="kayat-text">Hello</span>', window.webview.html)
+		self.assertIn('.kayat-column {', window.webview.html)
+		self.assertIn('flex-direction: column;', window.webview.html)
+		self.assertIn('align-items: flex-start;', window.webview.html)
+		self.assertIn('flex-direction: row;', window.webview.html)
+
+	def test_window_load_applies_base_css_without_replacing_layout_styles(self):
+		from kayat.rendering import HTMLRenderer
+		from kayat.ui import Column, Text
+		from kayat.window import Window
+
+		window = Window("Test")
+		window.webview = types.SimpleNamespace(html=None)
+		window.webview.load_html = lambda html: setattr(window.webview, "html", html)
+
+		window.load(HTMLRenderer().render(Column(Text("Hello"), gap=12, alignment="center")))
+
+		self.assertIn('.kayat-column {', window.webview.html)
+		self.assertIn('flex-direction: column;', window.webview.html)
+		self.assertIn('align-items: flex-start;', window.webview.html)
+		self.assertIn('gap: 12px; align-items: center', window.webview.html)
+
+	def test_window_load_preserves_all_hello_example_children(self):
+		from kayat.rendering import HTMLRenderer
+		from kayat.ui import Button, Column, Text
+		from kayat.window import Window
+
+		window = Window("Test")
+		window.webview = types.SimpleNamespace(html=None)
+		window.webview.load_html = lambda html: setattr(window.webview, "html", html)
+		tree = Column(
+			Text("Welcome to Kayat!"),
+			Text("This is a simple example of a Kayat app."),
+			Button("Click me!"),
+		)
+
+		window.load(HTMLRenderer().render(tree))
+
+		self.assertLess(
+			window.webview.html.index("Welcome to Kayat!"),
+			window.webview.html.index("This is a simple example of a Kayat app."),
+		)
+		self.assertLess(
+			window.webview.html.index("This is a simple example of a Kayat app."),
+			window.webview.html.index("Click"),
+		)
 
 	def test_registered_bridge_function_is_exposed_directly_on_js_api(self):
 		bridge = Bridge()

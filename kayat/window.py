@@ -1,4 +1,5 @@
 from .bridge import Bridge, JS
+from .rendering import document_with_css
 from .webview.pywebview import PyWebView
 
 
@@ -44,7 +45,7 @@ class Window:
 
     def load(self, html):
         """Load rendered HTML into the window's WebView."""
-        self.load_html(html)
+        self.load_html(document_with_css(html))
 
     def show(self):
         self.webview.show()

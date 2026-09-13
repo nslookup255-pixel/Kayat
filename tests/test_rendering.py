@@ -61,6 +61,20 @@ class HTMLRendererTest(unittest.TestCase):
 			'<button class="kayat-button">B</button></div></div>',
 		)
 
+	def test_column_renders_all_three_children_from_hello_example(self):
+		tree = Column(
+			Text("Welcome to Kayat!"),
+			Text("This is a simple example of a Kayat app."),
+			Button("Click"),
+		)
+
+		self.assertEqual(
+			self.renderer.render(tree),
+			'<div class="kayat-column"><span class="kayat-text">Welcome to Kayat!</span>'
+			'<span class="kayat-text">This is a simple example of a Kayat app.</span>'
+			'<button class="kayat-button">Click</button></div>',
+		)
+
 	def test_supported_layout_properties_render_as_style(self):
 		tree = Container(
 			Text("content"),

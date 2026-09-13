@@ -5,8 +5,9 @@ from kayat.ui import Column, Text, Button
 class Hello(Component):
     def render(self):
         return Column(
-            Text("Hello from Kayat"),
-            Button("Click"),
+            Text("Welcome to Kayat!"),
+            Text("This is a simple example of a Kayat app."),
+            Button("Click me!"),
         )
 
 

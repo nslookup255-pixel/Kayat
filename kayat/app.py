@@ -47,7 +47,7 @@ class App:
 
             self.window = Window(self.title, self.width, self.height)
 
-        self.window.load_html(self.renderer.render(self.root))
+        self.window.load(self.renderer.render(self.root))
         self.window.show()
 
         return self.root

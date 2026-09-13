@@ -27,6 +27,9 @@ class FakeWindow:
 	def load_html(self, html):
 		self.loaded_html.append(html)
 
+	def load(self, html):
+		self.load_html(html)
+
 	def show(self):
 		self.show_calls += 1
 
