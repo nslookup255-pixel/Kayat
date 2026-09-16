@@ -81,6 +81,18 @@ class PyWebViewTest(unittest.TestCase):
 		self.assertIn('align-items: flex-start;', window.webview.html)
 		self.assertIn('gap: 12px; align-items: center', window.webview.html)
 
+	def test_window_load_injects_event_runtime(self):
+		from kayat.window import Window
+
+		window = Window("Test")
+		window.webview = types.SimpleNamespace(html=None)
+		window.webview.load_html = lambda html: setattr(window.webview, "html", html)
+
+		window.load('<button data-kayat-id="element-1" data-kayat-event="click">Click</button>')
+
+		self.assertIn("pywebviewready", window.webview.html)
+		self.assertIn("dispatch_event", window.webview.html)
+
 	def test_window_load_preserves_all_hello_example_children(self):
 		from kayat.rendering import HTMLRenderer
 		from kayat.ui import Button, Column, Text

@@ -20,18 +20,30 @@ Build desktop GUI applications with Python and HTML.
     │   │
     │   ├── ui/
     │   │   ├── __init__.py
-    │   │   └── component.py
+    │   │   └── component_name.py ...
     │   │
-    │   └── webview/
+    │   ├── webview/
+    │   │   ├── __init__.py
+    │   │   ├── base.py
+    │   │   └── pywebview.py
+    │   │
+    │   ├── bridge/
+    │   │   ├── __init__.py
+    │   │   ├── bridge.py
+    │   │   └── js.py   
+    │   │
+    │   └── rendering/
     │       ├── __init__.py
-    │       ├── base.py
-    │       └── pywebview.py
+    │       └── html.py
     │
     ├── examples/
     │   └── hello.py
     │
     ├── tests/
     │   └── test_name.py ...
+    │
+    ├── .github/
+    │   └── dependabot.yml
     │
     ├── pyproject.toml
     ├── README.md
@@ -49,4 +61,4 @@ Build desktop GUI applications with Python and HTML.
 - [x] Connect Windows and Webview(UI)
   - [x] Real HTML rendering
 - [x] Load rendered HTML into a native WebView window
-- [ ] Connect Python and JS
+- [x] Connect Python and JS

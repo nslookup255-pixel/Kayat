@@ -1,4 +1,5 @@
 import html
+from functools import partial
 
 from ..core.component import Component
 from ..core.element import Element
@@ -29,8 +30,18 @@ class HTMLRenderer:
 	)
 	_DIMENSION_PROPS = {"width", "height", "padding", "margin", "gap"}
 
+	def __init__(self, bridge=None):
+		self.bridge = bridge
+		self._element_counter = 0
+
+	def set_bridge(self, bridge):
+		self.bridge = bridge
+
 	def render(self, node):
 		"""Return HTML for an Element or Component tree."""
+		self._element_counter = 0
+		if self.bridge is not None:
+			self.bridge.begin_render()
 		return self._render_node(node)
 
 	def _render_node(self, node):
@@ -45,6 +56,16 @@ class HTMLRenderer:
 
 		tag, class_name = self._TAGS[type(node)]
 		attributes = [f'class="{class_name}"']
+		if isinstance(node, Button) and node.props.get("on_click") is not None:
+			element_id = self._next_element_id()
+			attributes.extend([
+				f'data-kayat-id="{element_id}"',
+				'data-kayat-event="click"',
+			])
+			if self.bridge is not None:
+				self.bridge.register_event(
+					element_id, "click", partial(node.trigger, "click")
+				)
 		style = self._style(node.props)
 		if style:
 			attributes.append(f'style="{html.escape(style, quote=True)}"')
@@ -53,6 +74,10 @@ class HTMLRenderer:
 
 		content = self._content(node)
 		return f"<{tag} {' '.join(attributes)}>{content}</{tag}>"
+
+	def _next_element_id(self):
+		self._element_counter += 1
+		return f"element-{self._element_counter}"
 
 	def _content(self, node):
 		if isinstance(node, Text):

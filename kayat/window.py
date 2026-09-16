@@ -22,6 +22,9 @@ class PythonAPI:
     def call(self, name, *args, **kwargs):
         return self._bridge.call(name, *args, **kwargs)
 
+    def dispatch_event(self, element_id, event_name, *args, **kwargs):
+        return self._bridge.dispatch_event(element_id, event_name, *args, **kwargs)
+
 
 class Window:
     def __init__(self, title="Kayat App", width=800, height=600):
@@ -45,7 +48,7 @@ class Window:
 
     def load(self, html):
         """Load rendered HTML into the window's WebView."""
-        self.load_html(document_with_css(html))
+        self.load_html(document_with_css(html, script=self.bridge.javascript_runtime()))
 
     def show(self):
         self.webview.show()

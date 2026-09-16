@@ -55,6 +55,28 @@ class BridgeTest(unittest.TestCase):
 		with self.assertRaisesRegex(ValueError, "Unknown bridge function: missing"):
 			bridge.call("missing")
 
+	def test_dispatch_event_calls_registered_callback(self):
+		bridge = Bridge()
+		calls = []
+		bridge.register_event("element-1", "click", lambda: calls.append("clicked"))
+
+		bridge.dispatch_event("element-1", "click")
+
+		self.assertEqual(calls, ["clicked"])
+
+	def test_dispatch_event_ignores_unknown_element_and_event(self):
+		bridge = Bridge()
+		bridge.register_event("element-1", "click", lambda: self.fail("called"))
+
+		self.assertIsNone(bridge.dispatch_event("unknown", "click"))
+		self.assertIsNone(bridge.dispatch_event("element-1", "keydown"))
+
+	def test_javascript_runtime_waits_for_pywebview_ready(self):
+		runtime = Bridge().javascript_runtime()
+
+		self.assertIn("pywebviewready", runtime)
+		self.assertIn("dispatch_event", runtime)
+
 
 if __name__ == "__main__":
 	unittest.main()

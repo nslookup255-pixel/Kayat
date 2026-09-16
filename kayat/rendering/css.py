@@ -28,9 +28,10 @@ body {
 """
 
 
-def document_with_css(body, css=DEFAULT_CSS):
+def document_with_css(body, css=DEFAULT_CSS, script=""):
 	"""Wrap rendered Kayat HTML in a document containing the base stylesheet."""
+	script_markup = f"<script>{script}</script>" if script else ""
 	return (
 		"<!doctype html><html><head><meta charset=\"utf-8\">"
-		f"<style>{css}</style></head><body>{body}</body></html>"
+		f"<style>{css}</style>{script_markup}</head><body>{body}</body></html>"
 	)

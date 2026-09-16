@@ -47,6 +47,10 @@ class App:
 
             self.window = Window(self.title, self.width, self.height)
 
+        set_bridge = getattr(self.renderer, "set_bridge", None)
+        bridge = getattr(self.window, "bridge", None)
+        if set_bridge is not None and bridge is not None:
+            set_bridge(bridge)
         self.window.load(self.renderer.render(self.root))
         self.window.show()
 

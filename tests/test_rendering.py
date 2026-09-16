@@ -1,5 +1,6 @@
 import unittest
 
+from kayat.bridge import Bridge
 from kayat.rendering import HTMLRenderer
 from kayat.ui import Button, Column, Component, Container, Element, Row, Text
 
@@ -107,6 +108,32 @@ class HTMLRendererTest(unittest.TestCase):
 		html = self.renderer.render(Button("Click", on_click=handler))
 		self.assertNotIn("on_click", html)
 		self.assertNotIn("handler", html)
+
+	def test_button_callback_renders_event_metadata_and_registers_handler(self):
+		bridge = Bridge()
+		calls = []
+		html = HTMLRenderer(bridge).render(
+			Button("Click", on_click=lambda: calls.append("clicked"))
+		)
+
+		self.assertEqual(
+			html,
+			'<button class="kayat-button" data-kayat-id="element-1" '
+			'data-kayat-event="click">Click</button>',
+		)
+		self.assertNotIn("lambda", html)
+		bridge.dispatch_event("element-1", "click")
+		self.assertEqual(calls, ["clicked"])
+
+	def test_button_ids_are_deterministic_within_each_render(self):
+		bridge = Bridge()
+		renderer = HTMLRenderer(bridge)
+		tree = Column(Button("A", on_click=lambda: None), Button("B", on_click=lambda: None))
+
+		first = renderer.render(tree)
+		second = renderer.render(tree)
+
+		self.assertEqual(first, second)
 
 	def test_component_is_mounted_and_its_element_is_rendered(self):
 		component = Greeting()
