@@ -14,13 +14,11 @@
 <p>
   <a href="#-quick-start">Quick Start</a>
   ·
-  <a href="#-features">Features</a>
+    <a href="#features">Features</a>
   ·
-  <a href="#-documentation">Documentation</a>
-  <!--
-  ·
-  <a href="#-roadmap">Roadmap</a>
-  -->
+    <a href="#documentation">Documentation</a>
+    ·
+    <a href="#roadmap">Roadmap</a>
 </p>
 
 <p>
@@ -254,7 +252,7 @@ Kayat transforms the component tree into the underlying UI representation.
 
 ```text
 ┌─────────────────────┐
-│   Python Application │
+│  Python Application │
 └──────────┬──────────┘
            │
            ▼
@@ -327,39 +325,78 @@ Planned deployment features include:
 
 ---
 
-# 🛠️ Development Status
+## Roadmap
 
-Kayat is currently in **early development**.
+Kayat is a Python-first GUI framework designed to integrate naturally with existing Python applications and libraries, while making GUI development and deployment simple.
 
-#### Core
+### v0.2 — Foundation
 
-* [x] Component system
-* [x] Element system
-* [x] State system
-* [x] Event system
-* [x] HTML rendering
-* [x] Python ↔ JavaScript communication
-* [x] WebView integration
-* [x] Window management
-* [ ] Custom application icon
-* [x] Basic window configuration
-* [x] Basic UI components
-* [ ] Dialogs
-* [ ] Assets management
+Focus on making the core Kayat API usable and stable.
 
-### Developer Experience
+- Python ↔ JavaScript communication
+- WebView integration
+- Window management improvements
+- Dialogs
+- Assets management
+- Custom application icons
+- Simplified public API
+- Python function ↔ event integration
+- Support for arbitrary Python values in State
+- Basic value → UI representation
 
-* [ ] CLI
-* [ ] Project scaffolding
-* [ ] Development server
-* [ ] Hot reload
-* [ ] Better error messages
+### v0.3 — Developer Experience
 
-### Deployment
+Focus on making it easy to start a Kayat project.
 
-* [ ] Application packaging
-* [ ] Standalone builds
-* [ ] Cross-platform deployment
+- `kayat new <project-name>`
+- Project scaffolding
+- Virtual environment setup
+- Dependency detection
+- Dependency installation/setup
+- `kayat dev`
+- Development server
+- Hot reload
+- Better error messages
+
+`kayat new` will eventually be able to inspect an existing Python project, detect its dependencies, create and configure a virtual environment, and set up the required project dependencies.
+
+### v0.4 — Integration
+
+Focus on integration with the existing Python ecosystem.
+
+- Arbitrary Python object support
+- External function result integration
+- Iterable result handling
+- Async function support
+- Custom renderer API
+- Python object → UI conversion
+- File/image data integration
+- JSON/list/dict representations
+- Examples integrating common Python libraries
+
+### v0.5 — Development Workflow
+
+Focus on improving the day-to-day development experience.
+
+- Improved dependency detection
+- Project configuration
+- Environment/version checks
+- Debugging improvements
+- Better development tooling
+- More robust error reporting
+
+### v0.6+ — Deployment
+
+Focus on making applications easy to distribute.
+
+- Application packaging
+- Standalone builds
+- Dependency bundling
+- Asset bundling
+- Windows deployment
+- macOS deployment
+- Linux deployment
+- Custom application icons
 
 
 ---
@@ -379,20 +416,6 @@ Documentation is currently being developed.
 * **API Reference**
 
 > Documentation will expand as the API stabilizes.
-
-<!--
-
----
-# Roadmap
-
-<div align="center">
-
-Put roadmap image here 
-
-</div>
-
-The roadmap may change as Kayat develops.
--->
 
 ---
 
