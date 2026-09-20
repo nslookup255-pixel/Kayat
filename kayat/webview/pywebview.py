@@ -1,9 +1,16 @@
 import platform
+from typing import Protocol
 
 import webview
 
 from ..core.icon import resolve_icon_path
 from .base import WebView
+
+
+class _NativeWindow(Protocol):
+    def evaluate_js(self, script): ...
+
+    def destroy(self): ...
 
 
 class PyWebView(WebView):
@@ -22,19 +29,20 @@ class PyWebView(WebView):
             if current_platform == "Windows" and self.icon.suffix.lower() != ".ico":
                 raise ValueError("Windows native application icons require an .ico file")
         self.html = ""
-        self.window = None
+        self.window: _NativeWindow | None = None
         self._started = False
-
-    def _require_window(self):
-        if self.window is None:
-            raise RuntimeError("WebView has not been shown")
-        return self.window
 
     def load_html(self, html):
         self.html = html
 
     def evaluate_js(self, script):
         return self._require_window().evaluate_js(script)
+
+    def _require_window(self) -> _NativeWindow:
+        window = self.window
+        if window is None:
+            raise RuntimeError("WebView is not shown")
+        return window
 
     def show(self):
         if self._started:

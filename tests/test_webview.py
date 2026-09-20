@@ -1,6 +1,8 @@
 import sys
 import types
 import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 
 class FakeWindow:
@@ -25,7 +27,8 @@ class FakeWebViewModule:
 		self.created_with = (args, kwargs)
 		return self.window
 
-	def start(self):
+	def start(self, **kwargs):
+		self.started_with = kwargs
 		return None
 
 
@@ -40,6 +43,36 @@ from kayat.window import PythonAPI
 
 
 class PyWebViewTest(unittest.TestCase):
+	def test_show_passes_icon_to_pywebview_start(self):
+		with TemporaryDirectory() as directory:
+			icon = Path(directory) / "icon.ico"
+			icon.write_bytes(b"\x00\x00\x01\x00\x01\x00")
+			view = PyWebView("Test", 800, 600, icon=icon)
+			view.load_html("<h1>Test</h1>")
+
+			view.show()
+
+			self.assertEqual(fake_webview.started_with, {"icon": str(icon.resolve())})
+
+	def test_invalid_icon_paths_fail_clearly(self):
+		with self.assertRaisesRegex(FileNotFoundError, "Icon file does not exist"):
+			PyWebView("Test", 800, 600, icon="missing.ico")
+
+		with TemporaryDirectory() as directory:
+			icon = Path(directory) / "icon.txt"
+			icon.write_text("not an icon")
+			with self.assertRaisesRegex(ValueError, "Unsupported icon format"):
+				PyWebView("Test", 800, 600, icon=icon)
+
+	def test_path_objects_are_supported_for_icons(self):
+		with TemporaryDirectory() as directory:
+			icon = Path(directory) / "icon.ico"
+			icon.write_bytes(b"\x00\x00\x01\x00\x01\x00")
+
+			view = PyWebView("Test", 800, 600, icon=icon)
+
+			self.assertEqual(view.icon, icon.resolve())
+
 	def test_window_connects_both_communication_directions(self):
 		from kayat.window import Window
 
@@ -161,6 +194,14 @@ class PyWebViewTest(unittest.TestCase):
 		view.close()
 
 		self.assertTrue(fake_webview.window.destroyed)
+
+	def test_window_operations_require_showing_the_webview(self):
+		view = PyWebView("Test", 800, 600)
+
+		with self.assertRaisesRegex(RuntimeError, "WebView is not shown"):
+			view.evaluate_js("1 + 1")
+		with self.assertRaisesRegex(RuntimeError, "WebView is not shown"):
+			view.close()
 
 
 if __name__ == "__main__":
