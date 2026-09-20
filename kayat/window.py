@@ -27,10 +27,11 @@ class PythonAPI:
 
 
 class Window:
-    def __init__(self, title="Kayat App", width=800, height=600):
+    def __init__(self, title="Kayat App", width=800, height=600, icon=None):
         self.title = title
         self.width = width
         self.height = height
+        self.icon = icon
 
         self.bridge = Bridge()
         self.api = PythonAPI(self.bridge)
@@ -40,6 +41,7 @@ class Window:
             width,
             height,
             self.api,
+            icon,
         )
         self.js = JS(self.webview)
 

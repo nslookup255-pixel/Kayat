@@ -1,12 +1,14 @@
 from .core.component import Component
+from .core.icon import resolve_icon_path
 from .rendering import HTMLRenderer
 
 
 class App:
-    def __init__(self, title="Kayat App", width=800, height=600, window=None, renderer=None):
+    def __init__(self, title="Kayat App", width=800, height=600, window=None, renderer=None, icon=None):
         self.title = title
         self.width = width
         self.height = height
+        self.icon = resolve_icon_path(icon) if icon is not None else None
         self.root = None
         self._mounted = False
         self.window = window
@@ -45,7 +47,7 @@ class App:
         if self.window is None:
             from .window import Window
 
-            self.window = Window(self.title, self.width, self.height)
+            self.window = Window(self.title, self.width, self.height, icon=self.icon)
 
         set_bridge = getattr(self.renderer, "set_bridge", None)
         bridge = getattr(self.window, "bridge", None)

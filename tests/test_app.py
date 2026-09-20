@@ -1,4 +1,7 @@
 import unittest
+from pathlib import Path
+from tempfile import TemporaryDirectory
+from unittest.mock import patch
 
 from kayat.app import App
 from kayat.ui import Component, Text
@@ -72,6 +75,20 @@ class AppTest(unittest.TestCase):
 			['<span class="kayat-text">root</span>'],
 		)
 		self.assertEqual((app.title, app.width, app.height), ("Test", 1024, 768))
+
+	def test_run_passes_icon_to_window(self):
+		with TemporaryDirectory() as directory:
+			icon = Path(directory) / "icon.ico"
+			icon.write_bytes(b"\x00\x00\x01\x00\x01\x00")
+			window = FakeWindow()
+			app = App(window=window, icon=icon)
+			app.mount(Root())
+
+			with patch("kayat.window.Window") as window_type:
+				app.window = None
+				app.run()
+
+			window_type.assert_called_once_with("Kayat App", 800, 600, icon=icon.resolve())
 
 	def test_run_loads_rendered_html_each_time_without_remounting(self):
 		window = FakeWindow()
