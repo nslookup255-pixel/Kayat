@@ -112,6 +112,16 @@ Create desktop applications while keeping your development workflow Python-based
 
 </td>
 </tr>
+
+<tr>
+<td>
+
+### Dialogs
+
+Use built-in alert, confirmation, and user input dialogs.
+
+</td>
+</tr>
 </table>
 
 ---

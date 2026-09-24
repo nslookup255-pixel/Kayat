@@ -1,4 +1,5 @@
 from .bridge import Bridge, JS
+from .dialogs import _clear_active_window, _set_active_window
 from .rendering import document_with_css
 from .webview.pywebview import PyWebView
 
@@ -53,7 +54,40 @@ class Window:
         self.load_html(document_with_css(html, script=self.bridge.javascript_runtime()))
 
     def show(self):
-        self.webview.show()
+        _set_active_window(self)
+        try:
+            self.webview.show()
+        except Exception:
+            _clear_active_window(self)
+            raise
 
     def close(self):
         self.webview.close()
+        _clear_active_window(self)
+
+    def alert(self, title, message):
+        self._validate_dialog_text(title, "title")
+        self._validate_dialog_text(message, "message")
+        self.js.call("window.alert", f"{title}\n\n{message}")
+        return None
+
+    def confirm(self, title, message):
+        self._validate_dialog_text(title, "title")
+        self._validate_dialog_text(message, "message")
+        result = self.js.call("window.confirm", f"{title}\n\n{message}")
+        if not isinstance(result, bool):
+            raise RuntimeError("WebView returned an invalid confirmation result")
+        return result
+
+    def prompt(self, title, message):
+        self._validate_dialog_text(title, "title")
+        self._validate_dialog_text(message, "message")
+        result = self.js.call("window.prompt", f"{title}\n\n{message}")
+        if result is not None and not isinstance(result, str):
+            raise RuntimeError("WebView returned an invalid prompt result")
+        return result
+
+    @staticmethod
+    def _validate_dialog_text(value, name):
+        if not isinstance(value, str):
+            raise TypeError(f"Dialog {name} must be a string")

@@ -1,6 +1,17 @@
 from .core import Component, Element, Events, State
+from .dialogs import alert, confirm, prompt
 
-__all__ = ["App", "Component", "Element", "Events", "State", "Window"]
+__all__ = [
+	"App",
+	"Component",
+	"Element",
+	"Events",
+	"State",
+	"Window",
+	"alert",
+	"confirm",
+	"prompt",
+]
 
 
 def __getattr__(name):
