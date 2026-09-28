@@ -3,6 +3,7 @@ from functools import partial
 
 from ..core.component import Component
 from ..core.element import Element
+from ..core.values import to_display_text
 from ..ui.button import Button
 from ..ui.column import Column
 from ..ui.container import Container
@@ -81,9 +82,9 @@ class HTMLRenderer:
 
 	def _content(self, node):
 		if isinstance(node, Text):
-			return html.escape(str(node.value), quote=True)
+			return html.escape(to_display_text(node.value), quote=True)
 		if isinstance(node, Button):
-			return html.escape(str(node.label), quote=True)
+			return html.escape(to_display_text(node.label), quote=True)
 		return "".join(self._render_node(child) for child in node.children)
 
 	def _style(self, props):

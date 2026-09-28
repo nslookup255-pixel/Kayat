@@ -184,6 +184,8 @@ Column(
 )
 ```
 
+`Text(value)` and `Button(label)` accept Python values directly. During HTML rendering, `None` becomes empty text and other values use `str()` (including collections and custom objects); the result is HTML-escaped. An invalid `__str__` implementation propagates its Python error. The original value remains available on the component, and State and Python bridge values are not converted for display. `JS.call` still accepts JSON-serializable arguments only.
+
 A UI can be composed into a tree:
 
 ```text

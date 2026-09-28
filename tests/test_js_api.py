@@ -49,6 +49,16 @@ class BridgeTest(unittest.TestCase):
 
 		self.assertEqual(bridge.call("add", 2, 3), 5)
 
+	def test_registered_function_receives_python_values_unchanged(self):
+		bridge = Bridge()
+		value = {"items": [1, True, None]}
+		received = []
+		bridge.register("capture", received.append)
+
+		bridge.call("capture", value)
+
+		self.assertIs(received[0], value)
+
 	def test_calling_unknown_function_raises_value_error(self):
 		bridge = Bridge()
 

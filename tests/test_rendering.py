@@ -2,7 +2,7 @@ import unittest
 
 from kayat.bridge import Bridge
 from kayat.rendering import HTMLRenderer
-from kayat.ui import Button, Column, Component, Container, Element, Row, Text
+from kayat.ui import Button, Column, Component, Container, Element, Row, State, Text
 
 
 class UnsupportedElement(Element):
@@ -19,6 +19,23 @@ class Greeting(Component):
 		return Text("Hello")
 
 
+class ValueComponent(Component):
+	value = State(0)
+
+	def render(self):
+		return Text(self.value)
+
+
+class CustomValue:
+	def __str__(self):
+		return "custom <value>"
+
+
+class InvalidStringValue:
+	def __str__(self):
+		return None
+
+
 class HTMLRendererTest(unittest.TestCase):
 	def setUp(self):
 		self.renderer = HTMLRenderer()
@@ -27,6 +44,63 @@ class HTMLRendererTest(unittest.TestCase):
 		self.assertEqual(
 			self.renderer.render(Text("<script>alert('x')</script>")),
 			'<span class="kayat-text">&lt;script&gt;alert(&#x27;x&#x27;)&lt;/script&gt;</span>',
+		)
+
+	def test_text_renders_primitive_values(self):
+		for value, expected in ((123, "123"), (3.14, "3.14"), (True, "True")):
+			with self.subTest(value=value):
+				self.assertEqual(
+					self.renderer.render(Text(value)),
+					f'<span class="kayat-text">{expected}</span>',
+				)
+
+	def test_none_renders_as_empty_text(self):
+		self.assertEqual(
+			self.renderer.render(Text(None)),
+			'<span class="kayat-text"></span>',
+		)
+
+	def test_collections_use_their_python_string_representation(self):
+		for value, expected in (
+			(["a", "b"], "[&#x27;a&#x27;, &#x27;b&#x27;]"),
+			(("a", "b"), "(&#x27;a&#x27;, &#x27;b&#x27;)"),
+			({"key": "value"}, "{&#x27;key&#x27;: &#x27;value&#x27;}"),
+		):
+			with self.subTest(value=value):
+				self.assertEqual(
+					self.renderer.render(Text(value)),
+					f'<span class="kayat-text">{expected}</span>',
+				)
+
+	def test_custom_objects_use_string_representation_and_are_escaped(self):
+		value = CustomValue()
+		text = Text(value)
+
+		self.assertIs(text.value, value)
+		self.assertEqual(
+			self.renderer.render(text),
+			'<span class="kayat-text">custom &lt;value&gt;</span>',
+		)
+
+	def test_values_with_invalid_string_representations_raise_type_error(self):
+		with self.assertRaises(TypeError):
+			self.renderer.render(Text(InvalidStringValue()))
+
+	def test_button_labels_accept_non_string_values(self):
+		self.assertEqual(
+			self.renderer.render(Button(123)),
+			'<button class="kayat-button">123</button>',
+		)
+
+	def test_state_updates_keep_python_values_and_can_be_displayed(self):
+		component = ValueComponent()
+		updated_value = {"count": [1, 2]}
+		component.value = updated_value
+
+		self.assertIs(component.value, updated_value)
+		self.assertEqual(
+			self.renderer.render(Text(component.value)),
+			'<span class="kayat-text">{&#x27;count&#x27;: [1, 2]}</span>',
 		)
 
 	def test_button_renders_as_button(self):
