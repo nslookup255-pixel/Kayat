@@ -87,10 +87,8 @@ Manage application state and update your UI when state changes.
 Handle user interactions directly from Python.
 
 ```python
-Button(
-    "Click me",
-    on_click=handle_click
-)
+button = Button("Click me")
+button.on_click(handle_click)
 ```
 
 </td>
@@ -220,11 +218,11 @@ class Counter:
 ### Events
 
 ```python
-Button(
-    "Increment",
-    on_click=increment
-)
+button = Button("Increment")
+button.on_click(increment)
 ```
+
+Browser click handlers may take no arguments or one plain dictionary with `type` and `element_id` keys. `Button.click()` and `Events.emit()` pass through the arguments supplied by the caller.
 
 State and events are designed to work together so applications can respond to user interaction.
 

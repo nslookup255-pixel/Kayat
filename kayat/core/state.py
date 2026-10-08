@@ -1,3 +1,5 @@
+from collections.abc import Callable
+
 from kayat.core.events import Events
 
 
@@ -42,10 +44,10 @@ class State:
         self._data[key] = value
         self._events.emit("change", key, old_value, value)
 
-    def on(self, key, callback):
+    def on(self, key: str, callback: Callable[..., object]) -> None:
         self._events.on(key, callback)
 
-    def off(self, key, callback):
+    def off(self, key: str, callback: Callable[..., object]) -> None:
         self._events.off(key, callback)
 
     def delete(self, key):

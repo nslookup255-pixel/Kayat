@@ -13,7 +13,11 @@ EVENT_RUNTIME = """\
                 if (window.pywebview && window.pywebview.api) {
                     window.pywebview.api.dispatch_event(
                         element.dataset.kayatId,
-                        element.dataset.kayatEvent
+                        element.dataset.kayatEvent,
+                        {
+                            type: event.type,
+                            element_id: element.dataset.kayatId
+                        }
                     );
                 }
             });

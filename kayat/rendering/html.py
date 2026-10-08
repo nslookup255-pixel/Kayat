@@ -1,5 +1,4 @@
 import html
-from functools import partial
 
 from ..core.component import Component
 from ..core.element import Element
@@ -65,7 +64,7 @@ class HTMLRenderer:
 			])
 			if self.bridge is not None:
 				self.bridge.register_event(
-					element_id, "click", partial(node.trigger, "click")
+					element_id, "click", node._dispatch_browser_click
 				)
 		style = self._style(node.props)
 		if style:

@@ -1,3 +1,5 @@
+from collections.abc import Callable
+
 from kayat.core.events import Events
 from kayat.core.state import State
 from .element import Element
@@ -53,13 +55,13 @@ class Component:
 	def on_unmount(self):
 		pass
 
-	def on(self, event_name, listener):
+	def on(self, event_name: str, listener: Callable[..., object]) -> None:
 		self._events.on(event_name, listener)
 
-	def off(self, event_name, listener):
+	def off(self, event_name: str, listener: Callable[..., object]) -> None:
 		self._events.off(event_name, listener)
 
-	def emit(self, event_name, *args, **kwargs):
+	def emit(self, event_name: str, *args, **kwargs) -> None:
 		self._events.emit(event_name, *args, **kwargs)
 
 	def _mount_children(self, node):

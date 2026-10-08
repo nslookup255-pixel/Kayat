@@ -86,6 +86,8 @@ class BridgeTest(unittest.TestCase):
 
 		self.assertIn("pywebviewready", runtime)
 		self.assertIn("dispatch_event", runtime)
+		self.assertIn("type: event.type", runtime)
+		self.assertIn("element_id: element.dataset.kayatId", runtime)
 
 
 if __name__ == "__main__":

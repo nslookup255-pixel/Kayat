@@ -13,7 +13,6 @@ class Hello(Component):
             Button("Click me!", on_click=self.handle_click),
         )
 
-
 if __name__ == "__main__":
     app = App(title="Hello from Kayat")
     app.mount(Hello())

@@ -199,6 +199,42 @@ class HTMLRendererTest(unittest.TestCase):
 		bridge.dispatch_event("element-1", "click")
 		self.assertEqual(calls, ["clicked"])
 
+	def test_button_on_click_method_uses_rendered_event_dispatch(self):
+		bridge = Bridge()
+		button = Button("Click")
+		calls = []
+		button.on_click(lambda: calls.append("clicked"))
+
+		HTMLRenderer(bridge).render(button)
+		bridge.dispatch_event("element-1", "click")
+
+		self.assertEqual(calls, ["clicked"])
+
+	def test_button_handler_receives_browser_event_data(self):
+		bridge = Bridge()
+		button = Button("Click")
+		received = []
+		button.on_click(received.append)
+		HTMLRenderer(bridge).render(button)
+		event = {"type": "click", "element_id": "element-1"}
+
+		bridge.dispatch_event("element-1", "click", event)
+
+		self.assertEqual(received, [event])
+
+	def test_zero_argument_button_handler_ignores_browser_event_data(self):
+		bridge = Bridge()
+		button = Button("Click")
+		calls = []
+		button.on_click(lambda: calls.append("clicked"))
+		HTMLRenderer(bridge).render(button)
+
+		bridge.dispatch_event(
+			"element-1", "click", {"type": "click", "element_id": "element-1"}
+		)
+
+		self.assertEqual(calls, ["clicked"])
+
 	def test_button_ids_are_deterministic_within_each_render(self):
 		bridge = Bridge()
 		renderer = HTMLRenderer(bridge)

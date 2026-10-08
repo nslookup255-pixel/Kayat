@@ -21,6 +21,101 @@ class UITest(unittest.TestCase):
 		self.assertIsNone(button.click("done"))
 		self.assertEqual(calls, ["done"])
 
+	def test_plain_function_can_be_event_handler(self):
+		calls = []
+		button = Button("Save")
+
+		def handler():
+			calls.append("clicked")
+
+		button.on_click(handler)
+		button.click()
+
+		self.assertEqual(calls, ["clicked"])
+
+	def test_zero_argument_handler(self):
+		calls = []
+		button = Button("Save")
+		button.on_click(lambda: calls.append("clicked"))
+
+		button.click()
+
+		self.assertEqual(calls, ["clicked"])
+
+	def test_event_argument_handler(self):
+		event = object()
+		received = []
+		button = Button("Save")
+		button.on_click(received.append)
+
+		button.click(event)
+
+		self.assertIs(received[0], event)
+
+	def test_lambda_can_be_event_handler(self):
+		calls = []
+		button = Button("Save")
+		button.on_click(lambda: calls.append("clicked"))
+
+		button.click()
+
+		self.assertEqual(calls, ["clicked"])
+
+	def test_callable_object_can_be_event_handler(self):
+		calls = []
+
+		class Handler:
+			def __call__(self):
+				calls.append("clicked")
+
+		button = Button("Save")
+		button.on_click(Handler())
+		button.click()
+
+		self.assertEqual(calls, ["clicked"])
+
+	def test_bound_method_can_be_event_handler(self):
+		calls = []
+
+		class Logic:
+			def handle_click(self):
+				calls.append("clicked")
+
+		button = Button("Save")
+		button.on_click(Logic().handle_click)
+		button.click()
+
+		self.assertEqual(calls, ["clicked"])
+
+	def test_pure_python_logic_runs_from_event_handler(self):
+		results = []
+
+		def calculate_score(value):
+			return value * 10
+
+		def handler():
+			results.append(calculate_score(5))
+
+		button = Button("Score")
+		button.on_click(handler)
+		button.click()
+
+		self.assertEqual(results, [50])
+
+	def test_on_click_can_clear_handler(self):
+		button = Button("Save", on_click=lambda: self.fail("handler called"))
+
+		button.on_click(None)
+
+		self.assertIsNone(button.click())
+
+	def test_non_callable_handler_is_rejected_when_clicked(self):
+		button = Button("Save")
+		button.on_click("not callable")
+
+		with self.assertRaisesRegex(TypeError, "must be callable"):
+			button.click()
+
 	def test_row_and_column_keep_children_in_order(self):
 		first, second = Text("first"), Text("second")
 		self.assertEqual(Row(first, second).children, [first, second])

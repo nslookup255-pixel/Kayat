@@ -37,7 +37,7 @@ class Element:
 		for child in self.children:
 			yield from child.walk() if isinstance(child, Element) else (child,)
 
-	def trigger(self, event_name, *args, **kwargs):
+	def trigger(self, event_name: str, *args, **kwargs) -> object | None:
 		callback = self.props.get(f"on_{event_name}")
 		if callback is None:
 			return None
