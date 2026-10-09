@@ -1,8 +1,8 @@
-import sys
 import types
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from unittest.mock import patch
 
 
 class FakeWindow:
@@ -32,17 +32,22 @@ class FakeWebViewModule:
 		return None
 
 
-fake_webview = FakeWebViewModule()
-sys.modules["webview"] = types.ModuleType("webview")
-sys.modules["webview"].create_window = fake_webview.create_window
-sys.modules["webview"].start = fake_webview.start
-
 from kayat.webview.pywebview import PyWebView
 from kayat.bridge import Bridge
 from kayat.window import PythonAPI
 
 
 class PyWebViewTest(unittest.TestCase):
+	def setUp(self):
+		self.fake_webview = FakeWebViewModule()
+		for name in ("create_window", "start"):
+			patcher = patch(
+				f"kayat.webview.pywebview.webview.{name}",
+				side_effect=getattr(self.fake_webview, name),
+			)
+			patcher.start()
+			self.addCleanup(patcher.stop)
+
 	def test_show_passes_icon_to_pywebview_start(self):
 		with TemporaryDirectory() as directory:
 			icon = Path(directory) / "icon.ico"
@@ -52,7 +57,7 @@ class PyWebViewTest(unittest.TestCase):
 
 			view.show()
 
-			self.assertEqual(fake_webview.started_with, {"icon": str(icon.resolve())})
+			self.assertEqual(self.fake_webview.started_with, {"icon": str(icon.resolve())})
 
 	def test_invalid_icon_paths_fail_clearly(self):
 		with self.assertRaisesRegex(FileNotFoundError, "Icon file does not exist"):
@@ -170,7 +175,7 @@ class PyWebViewTest(unittest.TestCase):
 
 		view.show()
 
-		args, kwargs = fake_webview.created_with
+		args, kwargs = self.fake_webview.created_with
 		self.assertEqual(args, ("Test",))
 		self.assertEqual(kwargs["html"], "<h1>Test</h1>")
 		self.assertEqual(kwargs["width"], 800)
@@ -184,16 +189,16 @@ class PyWebViewTest(unittest.TestCase):
 		view.show()
 		view.show()
 
-		self.assertEqual(fake_webview.created_with[1]["html"], "<h1>Test</h1>")
+		self.assertEqual(self.fake_webview.created_with[1]["html"], "<h1>Test</h1>")
 
 	def test_evaluate_js_and_close_delegate_to_window(self):
 		view = PyWebView("Test", 800, 600)
-		view.window = fake_webview.window
+		view.window = self.fake_webview.window
 
 		self.assertEqual(view.evaluate_js("1 + 1"), {"script": "1 + 1"})
 		view.close()
 
-		self.assertTrue(fake_webview.window.destroyed)
+		self.assertTrue(self.fake_webview.window.destroyed)
 
 	def test_window_operations_require_showing_the_webview(self):
 		view = PyWebView("Test", 800, 600)
