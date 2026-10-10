@@ -135,6 +135,15 @@ pip install kayat
 > Kayat is currently under active development.
 > The first PyPI release is planned for v0.3.0.
 
+## Command-line interface
+
+After installing Kayat, use the CLI to view its current options or installed version:
+
+```bash
+kayat --help
+kayat --version
+```
+
 ## Hello, Kayat!
 
 ```python
