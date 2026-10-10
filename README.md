@@ -133,7 +133,7 @@ pip install kayat
 ```
 
 > Kayat is currently under active development.
-> The first PyPI release is planned for v0.2.0.
+> The first PyPI release is planned for v0.3.0.
 
 ## Hello, Kayat!
 
