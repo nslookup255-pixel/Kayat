@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "{{project_name}}"
+version = "0.1.0"
+description = "A desktop application built with Kayat."
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "kayat @ git+https://github.com/nslookup255-pixel/Kayat.git",
+]

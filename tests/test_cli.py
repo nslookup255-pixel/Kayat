@@ -7,9 +7,15 @@ from contextlib import redirect_stderr, redirect_stdout
 from importlib.metadata import PackageNotFoundError, version
 from io import StringIO
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
-from kayat.cli import main
+try:
+	import tomllib
+except ModuleNotFoundError:
+	from setuptools._vendor import tomli as tomllib
+
+from kayat.cli import create_project, main
 
 
 class CLITest(unittest.TestCase):
@@ -31,6 +37,127 @@ class CLITest(unittest.TestCase):
 		self.assertIn("--help", output.getvalue())
 		self.assertIn("--version", output.getvalue())
 		self.assertNotIn("KAYAT", output.getvalue())
+
+	def test_new_help_describes_project_creation(self):
+		output = StringIO()
+		with redirect_stdout(output), self.assertRaises(SystemExit) as exit_info:
+			main(["new", "-h"])
+
+		self.assertEqual(exit_info.exception.code, 0)
+		self.assertIn("usage: kayat new", output.getvalue())
+		self.assertIn("project directory to create", output.getvalue())
+
+	def test_new_without_path_reports_usage_error(self):
+		error_output = StringIO()
+		with redirect_stderr(error_output), self.assertRaises(SystemExit) as exit_info:
+			main(["new"])
+
+		self.assertEqual(exit_info.exception.code, 2)
+		self.assertIn("the following arguments are required: path", error_output.getvalue())
+
+	def test_new_creates_project_files_and_uses_project_name(self):
+		with TemporaryDirectory() as directory:
+			output = StringIO()
+			project_path = Path(directory) / "my-kayat-app"
+			with redirect_stdout(output):
+				main(["new", str(project_path)])
+
+			self.assertEqual(
+				{path.name for path in project_path.iterdir()},
+				{"main.py", "README.md", "pyproject.toml", ".gitignore", "AGENTS.md", "CLAUDE.md"},
+			)
+			self.assertIn("my-kayat-app", (project_path / "README.md").read_text())
+			self.assertIn("my-kayat-app", (project_path / "main.py").read_text())
+			compile(
+				(project_path / "main.py").read_text(),
+				str(project_path / "main.py"),
+				"exec",
+			)
+			project_metadata = tomllib.loads(
+				(project_path / "pyproject.toml").read_text()
+			)
+			self.assertEqual(project_metadata["project"]["name"], "my-kayat-app")
+			self.assertEqual(project_metadata["project"]["requires-python"], ">=3.10")
+			self.assertEqual(
+				project_metadata["project"]["dependencies"],
+				["kayat @ git+https://github.com/nslookup255-pixel/Kayat.git"],
+			)
+			self.assertIn(str(project_path), output.getvalue())
+			self.assertIn("python main.py", output.getvalue())
+
+	def test_new_does_not_modify_existing_directory_or_file(self):
+		with TemporaryDirectory() as directory:
+			existing_directory = Path(directory) / "existing"
+			existing_directory.mkdir()
+			existing_file = existing_directory / "keep.txt"
+			existing_file.write_text("keep this data")
+
+			for target in (existing_directory, existing_file):
+				with self.subTest(target=target):
+					error_output = StringIO()
+					with (
+						redirect_stderr(error_output),
+						self.assertRaises(SystemExit) as exit_info,
+					):
+						main(["new", str(target)])
+					self.assertEqual(exit_info.exception.code, 2)
+					self.assertIn("target already exists", error_output.getvalue())
+
+			self.assertEqual(existing_file.read_text(), "keep this data")
+			self.assertEqual(list(existing_directory.iterdir()), [existing_file])
+
+	def test_new_rejects_invalid_project_name_and_missing_parent(self):
+		with TemporaryDirectory() as directory:
+			error_output = StringIO()
+			with redirect_stderr(error_output), self.assertRaises(SystemExit) as exit_info:
+				main(["new", str(Path(directory) / "bad$name")])
+			self.assertEqual(exit_info.exception.code, 2)
+			self.assertIn("project directory name", error_output.getvalue())
+
+			error_output = StringIO()
+			with redirect_stderr(error_output), self.assertRaises(SystemExit) as exit_info:
+				main(["new", str(Path(directory) / "missing" / "app")])
+			self.assertEqual(exit_info.exception.code, 2)
+			self.assertIn("parent directory does not exist", error_output.getvalue())
+
+	def test_project_creation_failure_cleans_staging_and_partial_destination(self):
+		with TemporaryDirectory() as directory:
+			project_path = Path(directory) / "failed-app"
+			write_file = "kayat.cli._write_project_file"
+			error_output = StringIO()
+			with patch(write_file, side_effect=OSError("simulated write failure")):
+				with (
+					redirect_stderr(error_output),
+					self.assertRaises(SystemExit) as exit_info,
+				):
+					main(["new", str(project_path)])
+
+			self.assertEqual(exit_info.exception.code, 2)
+			self.assertIn("simulated write failure", error_output.getvalue())
+			self.assertFalse(project_path.exists())
+			self.assertEqual(list(Path(directory).iterdir()), [])
+
+	def test_project_publish_failure_removes_created_files_and_directory(self):
+		with TemporaryDirectory() as directory:
+			project_path = Path(directory) / "failed-app"
+			replace_file = "kayat.cli.os.replace"
+
+			real_replace = os.replace
+			call_count = 0
+
+			def fail_after_first_publish(source, destination):
+				nonlocal call_count
+				call_count += 1
+				if call_count == 2:
+					raise OSError("simulated publish failure")
+				real_replace(source, destination)
+
+			with patch(replace_file, side_effect=fail_after_first_publish):
+				with self.assertRaisesRegex(OSError, "simulated publish failure"):
+					create_project(project_path)
+
+			self.assertFalse(project_path.exists())
+			self.assertEqual(list(Path(directory).iterdir()), [])
 
 	def test_version_matches_installed_package_metadata(self):
 		output = StringIO()
@@ -107,6 +234,21 @@ class CLITest(unittest.TestCase):
 						f"kayat {version('kayat')}",
 					)
 					self.assertNotIn("Python GUI Framework", result.stdout)
+
+	def test_installed_console_script_supports_new_help(self):
+		script_name = "kayat.exe" if os.name == "nt" else "kayat"
+		script = Path(sysconfig.get_path("scripts")) / script_name
+		for help_option in ("-h", "--help"):
+			with self.subTest(help_option=help_option):
+				result = subprocess.run(
+					[str(script), "new", help_option],
+					capture_output=True,
+					text=True,
+					check=False,
+				)
+
+				self.assertEqual(result.returncode, 0, result.stderr)
+				self.assertIn("usage: kayat new", result.stdout)
 
 	def test_installed_console_script_shows_header_without_arguments(self):
 		script_name = "kayat.exe" if os.name == "nt" else "kayat"
